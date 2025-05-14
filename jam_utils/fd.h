@@ -3,22 +3,22 @@
 #include <fcntl.h>
 #include <format>
 #include <stdexcept>
-#include <system_error>
-#include <unistd.h>
+
+namespace jam_utils {
 
 class FD {
-
-  FD(const int fd) {
-    if (fd < 0) {
-      throw std::runtime_error("Invalid FD");
+public:
+  FD(const int fd) : m_fd(fd) {
+    if (!valid()) {
+      throw std::runtime_error("Got a bad FD");
     }
   }
 
-  FD(const std::string &file_path, const int oflag = O_RDONLY) {
-    m_fd = open(file_path.c_str(), oflag);
+  FD(const std::string &file_path, const int oflags = O_RDONLY)
+      : m_fd(open(file_path.c_str(), oflags)) {
     if (!valid()) {
-      throw std::system_error(errno, std::system_category(),
-                              std::format("Could not open file {}", file_path));
+      throw std::runtime_error(
+          std::format("Failed to get fd for file at path: {}", file_path));
     }
   }
 
@@ -39,15 +39,17 @@ class FD {
     return *this;
   }
 
-  ~FD() noexcept {
+  ~FD() {
     if (valid()) {
       close(m_fd);
     }
   }
 
-  int fd() const noexcept { return m_fd; }
+  int fd() const { return m_fd; }
+  bool valid() const { return m_fd >= 0; }
 
 private:
   int m_fd = -1;
-  bool valid() const noexcept { return m_fd >= 0; }
+};
+
 };
