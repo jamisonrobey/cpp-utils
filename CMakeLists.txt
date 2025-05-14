@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(jam_utils INTERFACE)
 
-target_include_directories(jam_utils INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/jam_utils)
+target_include_directories(jam_utils INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 
