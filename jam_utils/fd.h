@@ -3,17 +3,18 @@
 #include <fcntl.h>
 #include <format>
 #include <stdexcept>
+#include <unistd.h>
 
 namespace jam_utils {
   class FD {
   public:
-    FD(const int fd) : m_fd(fd) {
+    explicit FD(const int fd) : m_fd(fd) {
       if (!valid()) {
         throw std::runtime_error("Got a bad FD");
       }
     }
 
-    FD(const std::string &file_path, const int oflags = O_RDONLY)
+    explicit FD(const std::string &file_path, const int oflags = O_RDONLY)
         : m_fd(open(file_path.c_str(), oflags)) {
       if (!valid()) {
         throw std::runtime_error(
@@ -38,14 +39,14 @@ namespace jam_utils {
       return *this;
     }
 
-    ~FD() {
+    ~FD() noexcept {
       if (valid()) {
         close(m_fd);
       }
     }
 
-    int fd() const { return m_fd; }
-    bool valid() const { return m_fd >= 0; }
+    int fd() const noexcept { return m_fd; }
+    bool valid() const noexcept { return m_fd >= 0; }
 
   private:
     int m_fd = -1;
