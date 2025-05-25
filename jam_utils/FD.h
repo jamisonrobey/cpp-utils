@@ -8,14 +8,14 @@
 namespace jam_utils {
   class FD {
   public:
-    explicit FD(const int fd) : m_fd(fd) {
+    explicit FD(const int fd) : fd_(fd) {
       if (!valid()) {
         throw std::runtime_error("Got a bad FD");
       }
     }
 
     explicit FD(const std::string &file_path, const int oflags = O_RDONLY)
-        : m_fd(open(file_path.c_str(), oflags)) {
+        : fd_(open(file_path.c_str(), oflags)) {
       if (!valid()) {
         throw std::runtime_error(
             std::format("Failed to get fd for file at path: {}", file_path));
@@ -27,28 +27,28 @@ namespace jam_utils {
     FD(const FD &) = delete;
     FD &operator=(const FD &) = delete;
 
-    FD(FD &&other) noexcept : m_fd(other.m_fd) { other.m_fd = -1; }
+    FD(FD &&other) noexcept : fd_(other.fd_) { other.fd_ = -1; }
     FD &operator=(FD &&other) noexcept {
       if (this != &other) {
         if (valid()) {
-          close(m_fd);
+          close(fd_);
         }
-        m_fd = other.m_fd;
-        other.m_fd = -1;
+        fd_ = other.fd_;
+        other.fd_ = -1;
       }
       return *this;
     }
 
     ~FD() noexcept {
       if (valid()) {
-        close(m_fd);
+        close(fd_);
       }
     }
 
-    int fd() const noexcept { return m_fd; }
-    bool valid() const noexcept { return m_fd >= 0; }
+    int fd() const noexcept { return fd_; }
+    bool valid() const noexcept { return fd_ >= 0; }
 
   private:
-    int m_fd = -1;
+    int fd_ = -1;
   };
 };
