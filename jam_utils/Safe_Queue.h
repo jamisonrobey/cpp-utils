@@ -3,19 +3,27 @@
 #include <concepts>
 #include <condition_variable>
 #include <mutex>
+#include <optional>
 #include <queue>
+#include <stop_token>
 
 // I used C++ concurrency in action (2nd ed.) listing 4.5 as a reference and
 // just adapted to use optional over bool and shared ptr this forces T to be
 // noexcept moveable which is not the end of the world
 
 namespace jam_utils {
+
   template <typename T>
-    requires std::movable<T> && std::is_nothrow_move_constructible_v<T>
+  concept Queueable = std::copy_constructible<T> && std::movable<T> &&
+                      std::is_nothrow_move_constructible_v<T>;
+
+  template <typename T>
+    requires std::movable<T>
+  // requires Queueable<T>
   class Safe_Queue {
     mutable std::mutex mut_;
     std::queue<T> queue_;
-    std::condition_variable cond_;
+    std::condition_variable_any cond_;
 
   public:
     Safe_Queue() = default;
