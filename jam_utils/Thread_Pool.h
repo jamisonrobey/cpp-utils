@@ -20,8 +20,6 @@ namespace jam_utils {
           while (!st.stop_requested()) {
             if (const auto task = tasks_.wait_and_pop(st)) {
               (*task)();
-            } else {
-              break;
             }
           }
         });
