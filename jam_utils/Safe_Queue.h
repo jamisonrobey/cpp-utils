@@ -14,12 +14,7 @@
 namespace jam_utils {
 
   template <typename T>
-  concept Queueable = std::copy_constructible<T> && std::movable<T> &&
-                      std::is_nothrow_move_constructible_v<T>;
-
-  template <typename T>
-    requires std::movable<T>
-  // requires Queueable<T>
+    requires std::is_nothrow_move_constructible_v<T>
   class Safe_Queue {
     mutable std::mutex mut_;
     std::queue<T> queue_;
@@ -57,6 +52,12 @@ namespace jam_utils {
     void push(const T &item) {
       std::scoped_lock lock(mut_);
       queue_.push(item);
+      cond_.notify_one();
+    }
+
+    void push(T &&item) {
+      std::scoped_lock lock(mut_);
+      queue_.push(std::move(item));
       cond_.notify_one();
     }
 
