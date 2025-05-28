@@ -35,16 +35,26 @@ namespace jam_utils {
 
     Safe_Queue &operator=(const Safe_Queue &other) {
       if (this != &other) {
-        std::scoped_lock lock(mut_, other.mut_);
-        queue_ = other.queue_;
+        if (this < &other) {
+          std::scoped_lock lock(mut_, other.mut_);
+          queue_ = other.queue_;
+        } else {
+          std::scoped_lock lock(other, mut_);
+          queue_ = other.queue_;
+        }
+        return *this;
       }
-      return *this;
     }
 
     Safe_Queue &operator=(Safe_Queue &&other) noexcept {
       if (this != &other) {
-        std::scoped_lock lock(mut_, other.mut_);
-        queue_ = std::move(other.queue_);
+        if (this < &other) {
+          std::scoped_lock lock(mut_, other.mut_);
+          queue_ = std::move(other.queue_);
+        } else {
+          std::scoped_lock lock(other.mut_, mut_);
+          queue_ = std::move(other.queue_);
+        }
       }
       return *this;
     }
