@@ -117,8 +117,7 @@ namespace jam_utils {
 
     void clear() {
       std::scoped_lock lock(mut_);
-      std::queue<T> empty_queue;
-      queue_.swap(empty_queue);
+      queue_ = {};
     }
 
     void swap(Safe_Queue &other) noexcept {
