@@ -14,20 +14,21 @@ namespace jam_utils {
       }
     }
 
-    explicit FD(const std::string &file_path, const int oflags = O_RDONLY)
-        : fd_(open(file_path.c_str(), oflags)) {
+    explicit FD(std::string_view file_path, const int oflags = O_RDONLY)
+      : fd_(open(file_path.data(), oflags)) {
       if (!valid()) {
         throw std::runtime_error(
             std::format("Failed to get fd for file at path: {}", file_path));
       }
     }
 
-    FD() = delete;
+    FD() : fd_(-1) {}
 
     FD(const FD &) = delete;
     FD &operator=(const FD &) = delete;
 
     FD(FD &&other) noexcept : fd_(other.fd_) { other.fd_ = -1; }
+
     FD &operator=(FD &&other) noexcept {
       if (this != &other) {
         if (valid()) {
@@ -49,6 +50,6 @@ namespace jam_utils {
     bool valid() const noexcept { return fd_ >= 0; }
 
   private:
-    int fd_ = -1;
+    int fd_;
   };
 };
